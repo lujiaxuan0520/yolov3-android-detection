@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
         private String mImagePath;
 //        private double confiThresh=classifier.getObjThresh();//从TinyClaasifier中读取置信度阈值
         private double confiThresh_roadline=0.08;//0.08
-        private double confiThresh_license=0.3;//0.3
+        private double confiThresh_license=0.1;//0.3
 
         public DetectThread(String path) {
             mImagePath = path;
