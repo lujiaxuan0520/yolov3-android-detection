@@ -15,7 +15,7 @@ public class TinyClassifier extends Classifier {
 
     public TinyClassifier(AssetManager assetManager) throws IOException{
         //super(assetManager, "yolov3-tiny-own-small-network.tflite", "my_tiny_shared_bike.txt", 416); //10M小模型，对应mObjThresh为0.02
-        super(assetManager, "yolov3-tiny-own-large-network.tflite", "my_tiny_shared_bike.txt", 416); //30M大模型，对应mObjThresh为
+        super(assetManager, "yolov3-tiny-own-roadLine-and-license.tflite", "my_tiny_shared_bike.txt", 416);
         mAnchors = new int[]{
                 10,14,  23,27,  37,58, 81,82,  135,169,  344,319
         };

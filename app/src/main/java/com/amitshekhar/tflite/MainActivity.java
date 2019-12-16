@@ -66,8 +66,9 @@ public class MainActivity extends AppCompatActivity {
 
     private class DetectThread extends Thread{
         private String mImagePath;
-//        private double confiThresh=0.02f;//置信度阈值
-        private double confiThresh=classifier.getObjThresh();//从TinyClaasifier中读取置信度阈值
+//        private double confiThresh=classifier.getObjThresh();//从TinyClaasifier中读取置信度阈值
+        private double confiThresh_roadline=0.08;//0.08
+        private double confiThresh_license=0.3;//0.3
 
         public DetectThread(String path) {
             mImagePath = path;
@@ -92,19 +93,43 @@ public class MainActivity extends AppCompatActivity {
                 paint.setStyle(Paint.Style.STROKE);
                 paint.setStrokeWidth(2.0f);
 
+                int roadline_count=0;
+                int license_count=0;
+
                 for (final Classifier.Recognition result : results) {//遍历所有找到的box
-                    final RectF location = result.getLocation();
-                    if (location != null && result.getConfidence() >= confiThresh) {
+                    final RectF location = result.getLocation();//location of the bounding box
+                    final String title=result.getTitle(); //label of the bounding box(example:road line)
+//                    Log.d("ljx", "!!!location:"+location.bottom);
+//                    if (location != null && result.getConfidence() >= confiThresh) {
+//                        canvas.drawRect(location, paint);
+//                    }
+                    if(location != null && title.equals("road line") && result.getConfidence()>=confiThresh_roadline)
+                    {
+                        roadline_count+=1;
+                        canvas.drawRect(location, paint);
+                    }
+                    else if(location != null && title.equals("license") && result.getConfidence()>=confiThresh_license)
+                    {
+                        license_count+=1;
                         canvas.drawRect(location, paint);
                     }
                 }
 
-                if(results.size()>0){
-                    Log.d("wangmin", "detect success!");
+                if(roadline_count>0 && license_count>0)
+                {
+                    Log.d("ljx", "detect success!");
                 }
-                else{
-                    Log.d("wangmin", "not detected!");
+                else
+                {
+                    Log.d("ljx", "no detection!");
                 }
+                Log.d("ljx", "roadline:"+roadline_count+" license:"+license_count);
+//                if(results.size()>0){
+//                    Log.d("wangmin", "detect success!");
+//                }
+//                else{
+//                    Log.d("wangmin", "not detected!");
+//                }
 
                 mHandler.post(new Runnable() {
                     @Override
