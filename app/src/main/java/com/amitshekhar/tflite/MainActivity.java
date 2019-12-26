@@ -66,9 +66,13 @@ public class MainActivity extends AppCompatActivity {
 
     private class DetectThread extends Thread{
         private String mImagePath;
-//        private double confiThresh=classifier.getObjThresh();//从TinyClaasifier中读取置信度阈值
+        // Thresh for confidence score of the bounding box
         private double confiThresh_roadline=0.08;//0.08
         private double confiThresh_license=0.1;//0.3
+        // Only the bounding box whose width and height suits can be detected.
+        // Thresh for the ratio of width and height.
+        private double ratioThresh_roadline=4.0;//width divide height
+        private double ratioThresh_license=1.5;//height divide width
 
         public DetectThread(String path) {
             mImagePath = path;
@@ -95,26 +99,55 @@ public class MainActivity extends AppCompatActivity {
 
                 int roadline_count=0;
                 int license_count=0;
+                double license_min_bottom=classifier.getInputSize();//所有license的bounding box中bottom值最小的
 
-                for (final Classifier.Recognition result : results) {//遍历所有找到的box
+                for (final Classifier.Recognition result : results) {//遍历所有找到的license
                     final RectF location = result.getLocation();//location of the bounding box
                     final String title=result.getTitle(); //label of the bounding box(example:road line)
-//                    Log.d("ljx", "!!!location:"+location.bottom);
-//                    if (location != null && result.getConfidence() >= confiThresh) {
-//                        canvas.drawRect(location, paint);
-//                    }
-                    if(location != null && title.equals("road line") && result.getConfidence()>=confiThresh_roadline)
-                    {
-                        roadline_count+=1;
-                        canvas.drawRect(location, paint);
-                    }
-                    else if(location != null && title.equals("license") && result.getConfidence()>=confiThresh_license)
-                    {
-                        license_count+=1;
-                        canvas.drawRect(location, paint);
+                    if(location != null && title.equals("license") && result.getConfidence()>=confiThresh_license) {
+                        float width = location.width();
+                        float height = location.height();
+                        float h_d_w = height / width;
+                        Log.d("ljx", "!!!license.left:" + location.left + ", right:" + location.right + ", top:" + location.top + ", bottom:" + location.bottom + ", width:" + width + ", height" + height + ", h/w:" + h_d_w);
+                        if (location.bottom < license_min_bottom) //寻找到最上方的license
+                            license_min_bottom = location.bottom;
+                        if (h_d_w > ratioThresh_license) // satisfy the restrict of width and height
+                        {
+                            license_count += 1;
+                            paint.setColor(Color.GREEN);//green paint
+                            canvas.drawRect(location, paint);
+                        } else // not satisfy the restrict of width and height
+                        {
+                            paint.setColor(Color.RED);//red paint
+                            canvas.drawRect(location, paint);
+                        }
                     }
                 }
 
+                for (final Classifier.Recognition result : results) {//遍历所有找到的road line
+                    final RectF location = result.getLocation();//location of the bounding box
+                    final String title = result.getTitle(); //label of the bounding box(example:road line)
+                    if(location != null && title.equals("road line") && result.getConfidence()>=confiThresh_roadline)
+                    {
+                        float width=location.width();
+                        float height=location.height();
+                        float w_d_h=width/height;
+                        Log.d("ljx","!!!road line.left:"+location.left+", right:"+location.right+", top:"+location.top+", bottom:"+location.bottom+", width:"+width+", height"+height+", w/h:"+w_d_h);
+                        if(w_d_h > ratioThresh_roadline && location.top > license_min_bottom) // satisfy the restrict of width and height and the road line is underneath a license
+                        {
+                            roadline_count+=1;
+                            paint.setColor(Color.GREEN);//green paint
+                            canvas.drawRect(location, paint);
+                        }
+                        else // not satisfy the restrict of width and height
+                        {
+                            paint.setColor(Color.RED);//red paint
+                            canvas.drawRect(location, paint);
+                        }
+                    }
+                }
+
+                Log.d("ljx","licen_min_bottom:"+license_min_bottom);
                 if(roadline_count>0 && license_count>0)
                 {
                     Log.d("ljx", "detect success!");
