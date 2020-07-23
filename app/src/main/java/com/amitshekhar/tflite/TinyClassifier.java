@@ -1,12 +1,7 @@
 package com.amitshekhar.tflite;
 
 import android.content.res.AssetManager;
-
 import java.io.IOException;
-
-/**
- * Created by WangMin on 2019/1/24.
- */
 
 // yolo-v3 tiny
 public class TinyClassifier extends Classifier {

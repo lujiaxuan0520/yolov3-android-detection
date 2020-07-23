@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
 //                Log.d("wangmin", "start detect, input size: " + classifier.getInputSize());
                 Bitmap bitmap = BitmapFactory.decodeFile(mImagePath);
 
-                resized_image = processBitmap(bitmap,classifier.getInputSize());
+                resized_image = processBitmap(bitmap,classifier.getInputSize()); // resize the image to the classifier's input size
 
                 ArrayList<Classifier.Recognition> results = null;
 
@@ -109,6 +109,9 @@ public class MainActivity extends AppCompatActivity {
                         float height = location.height();
                         float h_d_w = height / width;
                         Log.d("ljx", "!!!license.left:" + location.left + ", right:" + location.right + ", top:" + location.top + ", bottom:" + location.bottom + ", width:" + width + ", height" + height + ", h/w:" + h_d_w);
+
+                        Bitmap cropped_license = cropBitmap(resized_image,(int)location.left,(int)location.top,(int)width,(int)height); // crop the part of the license
+
                         if (location.bottom < license_min_bottom) //寻找到最上方的license
                             license_min_bottom = location.bottom;
                         if (h_d_w > ratioThresh_license) // satisfy the restrict of width and height
@@ -238,6 +241,7 @@ public class MainActivity extends AppCompatActivity {
         return matrix;
     }
 
+    // resize the Bitmap
     public static Bitmap processBitmap(Bitmap source,int size){
 
         int image_height = source.getHeight();
@@ -253,9 +257,14 @@ public class MainActivity extends AppCompatActivity {
         canvas.drawBitmap(source, frameToCropTransformations, null);
 
         return croppedBitmap;
-
-
     }
+
+    // crop the Bitmap
+    public static Bitmap cropBitmap(Bitmap bitmap,int start_w, int start_h, int width, int height){
+        Bitmap tmp_map = Bitmap.createBitmap(bitmap);
+        return Bitmap.createBitmap(tmp_map, start_w, start_h, width, height, null, false);
+    }
+
 
     @Override
     protected void onResume() {

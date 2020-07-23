@@ -23,10 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
-/**
- * Created by amitshekhar on 17/03/18.
- */
-
 public abstract class Classifier {
 
     /**
@@ -134,7 +130,7 @@ public abstract class Classifier {
         for (String label: mLabelList) {
             builder.append(label).append(" ");
         }
-        Log.d("wangmin", "Labels are:\n" + builder.toString());
+        Log.d("ljx", "Labels are:\n" + builder.toString());
 
         mInputSize = inputSize;
     }
@@ -161,7 +157,7 @@ public abstract class Classifier {
                     pq.add(list.get(i));
                 }
             }
-            Log.d("wangmin", "class[" + k + "] pq size: " + pq.size());
+            Log.d("ljx", "class[" + k + "] pq size: " + pq.size());
 
             //2.do non maximum suppression
             while(pq.size() > 0) {
@@ -171,7 +167,7 @@ public abstract class Classifier {
                 Recognition max = detections[0];
                 nmsList.add(max);
 
-                Log.d("wangmin", "before nms pq size: " + pq.size());
+                Log.d("ljx", "before nms pq size: " + pq.size());
 
                 //clear pq to do next nms
                 pq.clear();
@@ -183,7 +179,7 @@ public abstract class Classifier {
                         pq.add(detection);
                     }
                 }
-                Log.d("wangmin", "after nms pq size: " + pq.size());
+                Log.d("ljx", "after nms pq size: " + pq.size());
             }
         }
         return nmsList;
@@ -283,7 +279,7 @@ public abstract class Classifier {
             outputMap.put(i, out);
         }
 
-        Log.d("wangmin", "mObjThresh: " + getObjThresh());
+        Log.d("ljx", "mObjThresh: " + getObjThresh());
 
         Object[] inputArray = {byteBuffer};
         mInterpreter.runForMultipleInputsOutputs(inputArray, outputMap);
@@ -294,7 +290,7 @@ public abstract class Classifier {
             int gridWidth = mOutWidth[i];
             float[][][][][] out = (float[][][][][])outputMap.get(i);
 
-            Log.d("wangmin", "out[" + i + "] detect start");
+            Log.d("ljx", "out[" + i + "] detect start");
             for (int y = 0; y < gridWidth; ++y) {
                 for (int x = 0; x < gridWidth; ++x) {
                     for (int b = 0; b < NUM_BOXES_PER_BLOCK; ++b) {
@@ -329,7 +325,7 @@ public abstract class Classifier {
                             final float w = (float) (Math.exp(out[0][y][x][b][2]) * mAnchors[2 * mMasks[i][b] + 0]);
                             final float h = (float) (Math.exp(out[0][y][x][b][3]) * mAnchors[2 * mMasks[i][b] + 1]);
 
-                            Log.d("wangmin","box x:" + xPos + ", y:" + yPos + ", w:" + w + ", h:" + h);
+                            Log.d("ljx","box x:" + xPos + ", y:" + yPos + ", w:" + w + ", h:" + h);
 
                             final RectF rect =
                                     new RectF(
@@ -337,7 +333,7 @@ public abstract class Classifier {
                                             Math.max(0, yPos - h / 2),
                                             Math.min(bitmap.getWidth() - 1, xPos + w / 2),
                                             Math.min(bitmap.getHeight() - 1, yPos + h / 2));
-                            Log.d("wangmin", "detect " + mLabelList.get(detectedClass)
+                            Log.d("ljx", "detect " + mLabelList.get(detectedClass)
                                     + ", confidence: " + confidenceInClass
                                     + ", box: " + rect.toString());
                             detections.add(new Recognition("" + offset, mLabelList.get(detectedClass),
@@ -346,7 +342,7 @@ public abstract class Classifier {
                     }
                 }
             }
-            Log.d("wangmin", "out[" + i + "] detect end");
+            Log.d("ljx", "out[" + i + "] detect end");
         }
 
         final ArrayList<Recognition> recognitions = nms(detections);
